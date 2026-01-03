@@ -1,0 +1,92 @@
+# 多 Agent 强化学习 + 强化型联邦学习配置文件
+
+# 环境配置
+environment:
+  state_dim: 25  # 特征维度(20) + 历史统计(5)
+  action_dim: 3  # ALLOW, ALERT, BLOCK
+  history_length: 5
+  episode_length: 1000
+
+# Agent 配置
+agent:
+  type: 'dqn'  # 'dqn' 或 'ppo'
+  hidden_dims: [128, 64]
+  learning_rate: 0.001
+  gamma: 0.99
+  dropout: 0.1
+
+# DQN 特定配置
+dqn:
+  epsilon_start: 1.0
+  epsilon_end: 0.01
+  epsilon_decay: 0.995
+  target_update_freq: 10
+  use_dueling: false
+  replay_buffer_size: 10000
+  batch_size: 64
+  update_freq: 1
+
+# PPO 特定配置
+ppo:
+  gae_lambda: 0.95
+  clip_epsilon: 0.2
+  value_coef: 0.5
+  entropy_coef: 0.01
+  ppo_epochs: 4
+
+# 奖励函数配置
+reward:
+  attack_blocked_reward: 1.0
+  attack_missed_penalty: -1.0
+  false_positive_penalty: -0.3
+  normal_allowed_reward: 0.2
+  alert_reward: 0.1
+
+# 联邦学习配置
+federated:
+  num_clients: 3
+  aggregation_method: 'reward_based'  # 'reward_based', 'uniform', 'weighted_avg'
+  temperature: 1.0
+  min_weight: 0.01
+  num_rounds: 50
+  local_epochs: 5
+  episodes_per_epoch: 10
+
+# 训练配置
+training:
+  num_episodes: 100
+  batch_size: 64
+  update_freq: 1
+  eval_freq: 10
+  save_freq: 20
+  seed: 42
+
+# 数据配置
+data:
+  num_samples_per_client: 1000
+  feature_dim: 20
+  attack_ratios: [0.3, 0.4, 0.2]  # Non-IID 模拟
+  train_test_split: 0.8
+
+# 评估配置
+evaluation:
+  eval_episodes: 20
+  metrics:
+    - detection_rate
+    - false_positive_rate
+    - false_negative_rate
+    - f1_score
+    - avg_reward
+
+# 日志配置
+logging:
+  log_dir: './logs'
+  tensorboard: true
+  print_freq: 10
+  save_best: true
+
+# 模型保存配置
+model:
+  save_dir: './models'
+  checkpoint_dir: './checkpoints'
+  load_checkpoint: null  # 加载检查点路径（null 表示从头训练）
